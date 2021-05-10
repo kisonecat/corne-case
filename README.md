@@ -12,10 +12,10 @@ underlighting or the OLED.
 
 ## Structure of project
 
-The top of the case is defined in (top.scad)[./top.scad], which I
+The top of the case is defined in [top.scad](./top.scad), which I
 printed upside down.  The bottom of the case is
-(bottom.scad)[./bottom.scad].  Both these are built from
-(case.scad)[./case.scad], which depends on (screw.scad)[./screw.scad]
+[bottom.scad](./bottom.scad).  Both these are built from
+[case.scad](./case.scad), which depends on [screw.scad](./screw.scad)
 which provides the cutout for a fastener between the two pieces.  One
 side of the case has an M3-sized screwhole, and the other has a holder
 for a nut.  Melting a small spacer into the plastic would probably be
