@@ -2,8 +2,9 @@ include <screw.scad>
 
 W = 133.75066;
 H = 92.18542;
-$fn=32;
+$fn=32; // for higher resolution circles
 
+// bottom.svg is the PCB plate
 module bottom() {
     translate([0,-H,0])
     import("bottom.svg");
@@ -48,6 +49,7 @@ module keyswitches() {
     scale([0.99,0.99,1])
     translate([-W/2,H/2])
     linear_extrude(keyswitch_height) translate([0,-91.39875]) import("top.svg");
+    // top.svg is the acrylic plate
 }
 
 
@@ -86,27 +88,24 @@ module components() {
 }
 
 
-
-
-
 usbc_width = 14;
 usbc_center = 19 / 2 - 0.5;
 usbc_thickness = 5.7; 
-inset = 0.8;
+inset2 = 0.8;
 
 module usbc() {
          translate([W-usbc_center - usbc_width/2,-elitec_height+27,plate_thickness + spacer_height - keyswitch_bottom + pcb_thickness-1])
     
    hull() {
-        translate([inset,0,0])
-    cube([usbc_width-2*inset,elitec_height,usbc_thickness+1]); 
+        translate([inset2,0,0])
+    cube([usbc_width-2*inset2,elitec_height,usbc_thickness+1]); 
         
-        translate([0,0,inset])
-    cube([usbc_width,elitec_height,usbc_thickness+1-2*inset]); 
+        translate([0,0,inset2])
+    cube([usbc_width,elitec_height,usbc_thickness+1-2*inset2]); 
     }
 }
 
-
+// we never render parts(), but it helps to be able to determine the size of the objects that will go into the case
 module parts() {
     translate([0,0,spacer_height])
     linear_extrude(plate_thickness) translate([0,-91.39875]) import("top.svg");
@@ -117,10 +116,11 @@ spacer(105.850,67.125);
 spacer(92.100,19.625);
     
     translate([0,0,plate_thickness + spacer_height - keyswitch_bottom]) linear_extrude(pcb_thickness) bottom();
-    
 }
 
+// the screwholes are truncated cones so they can be removed without needing supports
 module screwhole(x,y) {
+    // the size of the cutouts on the SVG are 4.95mm, but the input to this module is the corner, so we shift by half 4.95mm in each axis
     translate([x+4.950/2,-y-4.950/2,-case_thinness - screwhead_height])
     union() {
     cylinder(h=10,r=screw_diameter/2);
@@ -129,6 +129,7 @@ module screwhole(x,y) {
     }
 }
 
+// the positions of the corner of the screwholes as measured from the SVG
 module screwholes() {
 screwhole(16.100,23.375);
 screwhole(16.100,42.125);
@@ -138,7 +139,6 @@ screwhole(92.100,19.625);
 }
 
 case_top = case_thinness + spacer_height + plate_thickness;
-
 
 module core() {
 minkowski()
@@ -181,7 +181,7 @@ linear_extrude(spacer_height + plate_thickness)
 translate([-W/2,H/2])
 bottom();
         
-        //usbc();
+        usbc();
         jack();
         keyswitches();
         parts();
@@ -209,55 +209,32 @@ fastener();
 
 case_bottom = case_thinness + screwhead_height;
 
-module case() {
-translate([0,0,case_top])
-scale([1,1,-1])
-translate([W/2,-H/2])
-linear_extrude(case_top + case_bottom,scale=S)
-    scale(1.05)
-    translate([-W/2,H/2])
-hull() bottom();
-}
 
-
-module final() {
-difference() {
-    case();
-    keyswitches();
-    screwholes();
-    components();
-    usbc();
-    jack();
-    hull() parts();
-
-}
-}
-
-//parts(); 
-//final();
-
-//basic2();
-
+// the height at which to cut the case in half
 slice = 4.9;
 
+// the separation between the two pieces includes cutouts for the jacks
 module separation() {
       translate([-W,-3*H/2,-case_bottom-1]) 
     cube([3*W,3*H,slice+1]);
     
     translate([W-jack_width+10,-jack_height/2 - trrs_height/2 -jack_offset,-17]) cube([2*jack_width,jack_height,30]); 
-    /*
-     translate([W-usbc_center - usbc_width/2,-elitec_height+27,-19]) cube([usbc_width,elitec_height,30]);*/
+    
+     translate([W-usbc_center - usbc_width/2,-elitec_height+27,-19]) cube([usbc_width,elitec_height,30]);
 }
 
-/*
+// this is the bottom of the case
+module the_bottom() {
 intersection() {
  separation();
  basic2();
 }
-*/
+}
 
-
+// this is the top of the case
+module the_top() {
 difference() {
  basic2();
      separation();
+}
 }
